@@ -12,7 +12,8 @@ cls
 
 $ConvertParams = @{
     PreContent = "<p><H1>Object Report</H1></P>
-    <p>Tip: Open script file and edit values in the usage section to fit your needs</p>"
+    <p>Tip: Open script file and edit values in the usage section to fit your needs</p>
+    <p>You can find this report at: $report</p>""
     PostContent = "<p class='footer'>$(get-date)</p>"
     head = @"
 <Title> File Size Report </Title>
@@ -158,3 +159,6 @@ Sort-Object FullName |
 ConvertTo-HTML @ConvertParams | Out-File $report
 
 Write-Host "Done!, Report saved to $report"
+
+# Show report in browser.
+Invoke-Item $report
