@@ -10,10 +10,36 @@
 
 cls
 
+############################# USAGE SECTION #############################
+
+# Location Where reports are saved
+$report = "C:\Temp\Report.html"
+
+# Filesize in bytes. Use google to convert MB/GB to bytes and change the variable to whatever you'd like
+# Example: 419430400 bytes is 400MB
+$FileSize = 4
+
+# Path to Folder from where you wish to generate the report
+$FolderPath = "C:\Temp"
+
+# File type to search for, you can use wildcards here.
+# Examples: *.upf*, *.jpeg, *
+$FileType = "*"
+
+############################# END USAGE SECTION ##########################
+
+# Convert input size from MegaBytes to Bytes
+#$a = “$([math]::Round($FileSize / 1))”
+
+# Convert Bytes to Megabytes
+$result = “$([math]::Round(($FileSize * 1MB),2))”
+
+
 $ConvertParams = @{
     PreContent = "<p><H1>Object Report</H1></P>
     <p>Tip: Open script file and edit values in the usage section to fit your needs</p>
-    <p>You can find this report at: $report</p>""
+	<p>You can find this report at: $report</p>
+    <p>The list bellow contains a list of all $FileType files bigger than $FileSize MB</p>"
     PostContent = "<p class='footer'>$(get-date)</p>"
     head = @"
 <Title> File Size Report </Title>
@@ -121,33 +147,15 @@ table tr:hover td {
 
 $($PSScriptRoot)
 
-############################# USAGE SECTION #############################
-
-# Location Where reports are saved
-$report = "C:\Temp\Report.html"
-
-# Filesize in bytes. Use google to convert MB/GB to bytes and change the variable to whatever you'd like
-# Example: 419430400 bytes is 400MB
-$FileSize = "1"
-
-# Path to Folder from where you wish to generate the report
-$FolderPath = "C:\Temp"
-
-# File type to search for, you can use wildcards here.
-# Examples: *.upf*, *.jpeg, *
-$FileType = "*"
-
-############################# END USAGE SECTION ##########################
-
 Write-Host "Generating report..."
 Get-ChildItem -Recurse -Force -ErrorAction SilentlyContinue -Path $FolderPath -include $FileType |  ## optionally -include *.txt,*.bak to match any combined set of file masks 
 
  
-where Length -gt $FileSize |  ## use to filter by other properties   ## Note: Length is the file size 
+where Length -gt $result |  ## use to filter by other properties   ## Note: Length is the file size 
 
 ForEach-Object {$_ | add-member -name "Owner" -membertype noteproperty -value (get-acl $_.fullname).owner -passthru} | 
 Select-Object FullName, @{Name="Size in MB";Expression={[math]::Truncate($_.Length / 1MB)}}, CreationTime, LastAccessTime, LastWriteTime, Extension, Owner | 
-Sort-Object FullName | 
+Sort-Object FullName |
 
 #choose which output type you want - only one of the following 
 
